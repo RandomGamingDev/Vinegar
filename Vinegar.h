@@ -65,7 +65,7 @@ struct Vin_ptr_borrow : Vin_ptr_base<Vin_ptr_own<type>> {
 
 // Vin_ptr_counted is used for other pointers as a way of counting the references to it.
 template <typename type>
-struct Vin_ptr_counted : Vin_ptr_base<void*> {
+struct Vin_ptr_counted : Vin_ptr_base<type> {
 public:
 	std::mutex countLock;
 	unsigned int count = 0;
@@ -99,7 +99,8 @@ struct Vin_ptr_counting_ptr_base : public Vin_ptr_base<Vin_ptr_counted<type>> {
 		Store();
 	}
 	void Free() {
-		delete this->pointer->pointer;
+		Vin_ptr_counted<type>* ptr = (Vin_ptr_counted<type>*)this->pointer;
+		ptr->Free();
 		Vin_ptr_base<Vin_ptr_counted<type>>::Free();
 	}
 	bool IsDangling() {
@@ -156,8 +157,9 @@ public:
 void Vin_GC() {
 	while (true) if (toCollect.size() != 0) {
 		lock_GC.lock();
-		delete toCollect[0]->pointer;
-		delete toCollect[0];
+		Vin_ptr_counted<void>* ptr = (Vin_ptr_counted<void>*)toCollect[0];
+		ptr->Free();
+		delete ptr;
 		toCollect.erase(toCollect.begin());
 		lock_GC.unlock();
 	}
