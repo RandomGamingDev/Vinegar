@@ -5,4 +5,6 @@ This library was created to not only help you understand the ins and outs of sma
 
 There are multiple different types of smart pointers, which allows for ownership and borrowing, shared pointers, and garbage collection.
 
+Please note that the garbage collector doesn't call the destructor. For this functionality you will have to implement it yourself with your own function for the garbage collector pointer.
+
 Note: This was made in a rush and I am open to any suggestions
